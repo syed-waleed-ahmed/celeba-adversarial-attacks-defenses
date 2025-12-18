@@ -1,0 +1,95 @@
+############################
+# OS / Editor
+############################
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+############################
+# Python
+############################
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+############################
+# Virtual environments
+############################
+.venv/
+venv/
+env/
+ENV/
+
+############################
+# Jupyter
+############################
+.ipynb_checkpoints/
+
+############################
+# Testing / Coverage
+############################
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+############################
+# Logs
+############################
+*.log
+logs/
+
+############################
+# Datasets (DO NOT COMMIT)
+############################
+data/
+datasets/
+**/celeba/
+**/CelebA/
+**/img_align_celeba/
+**/img_align_celeba.zip
+**/list_attr_celeba.txt
+**/list_eval_partition.txt
+**/identity_CelebA.txt
+**/list_bbox_celeba.txt
+**/list_landmarks_align_celeba.txt
+
+############################
+# Training artifacts (DO NOT COMMIT)
+############################
+checkpoints/
+weights/
+runs/
+outputs/*
+!outputs/.gitkeep
+results/
+
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# TensorBoard
+events.out.tfevents.*
+
+# Weights & Biases
+wandb/
+
+############################
+# Secrets
+############################
+.env
+.env.*
+secrets/
+*.pem
+*.key

@@ -1,0 +1,36 @@
+# Core DL
+torch
+torchvision
+
+# Dataset download helper used by torchvision for CelebA (Google Drive)
+gdown
+
+# Numerics + data handling
+numpy
+pandas
+
+# Progress + nicer console output
+tqdm
+rich
+
+# Metrics
+scikit-learn
+
+# Plotting
+matplotlib
+
+# Image utilities
+Pillow
+
+# Configs
+pyyaml
+
+# Optional experiment tracking (can be unused)
+tensorboard
+wandb
+
+# Dev / formatting (optional but helpful for group consistency)
+pytest
+black
+isort
+flake8
