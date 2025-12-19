@@ -4,8 +4,8 @@ This project studies adversarial robustness on the **CelebA (HOME)** dataset by 
 (e.g., Smiling vs Not Smiling) using an **ImageNet-pretrained ResNet (ResNet-18)**, applying **white-box attacks**
 (**FGSM**, optional **PGD**), and evaluating a defense via **adversarial training**.
 
-## Project scope (agreed)
-- Dataset: **CelebA HOME** (aligned & cropped images + attribute labels + official train/val/test split)
+## Project scope
+- Dataset: **CelebA** (aligned & cropped images + attribute labels + official train/val/test split)
 - Task: **Binary attribute classification** (one attribute at a time)
 - Model: **ImageNet-pretrained ResNet-18** (torchvision)
 - Attack: **FGSM** (baseline), optional **PGD** (creative extension)
