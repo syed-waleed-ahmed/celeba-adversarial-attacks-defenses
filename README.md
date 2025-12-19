@@ -22,7 +22,6 @@ This project studies adversarial robustness on the **CelebA (HOME)** dataset by 
 - `experiments/` runnable scripts to reproduce baseline/attack/defense results
 - `results/` generated figures/logs/checkpoints (ignored by git)
 - `report/` report files
-- `presentation/` slides material
 
 ## Setup (Windows PowerShell)
 ```bash
