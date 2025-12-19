@@ -2,34 +2,32 @@
 torch
 torchvision
 
-# Dataset download helper used by torchvision for CelebA (Google Drive)
+# CelebA downloader dependency used by torchvision sometimes
 gdown
 
-# Numerics + data handling
+# Data/metrics
 numpy
 pandas
+scikit-learn
 
-# Progress + nicer console output
+# Progress + console
 tqdm
 rich
-
-# Metrics
-scikit-learn
 
 # Plotting
 matplotlib
 
-# Image utilities
+# Images
 Pillow
 
-# Configs
+# Config
 pyyaml
 
-# Optional experiment tracking (can be unused)
+# Optional logging
 tensorboard
 wandb
 
-# Dev / formatting (optional but helpful for group consistency)
+# Dev tools (optional but useful)
 pytest
 black
 isort

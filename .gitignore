@@ -47,32 +47,26 @@ htmlcov/
 # Logs
 ############################
 *.log
-logs/
 
 ############################
-# Datasets (DO NOT COMMIT)
+# Dataset (DO NOT COMMIT)
 ############################
-data/
-datasets/
-**/celeba/
-**/CelebA/
-**/img_align_celeba/
-**/img_align_celeba.zip
-**/list_attr_celeba.txt
-**/list_eval_partition.txt
-**/identity_CelebA.txt
-**/list_bbox_celeba.txt
-**/list_landmarks_align_celeba.txt
+data/celeba/
+data/CelebA/
+data/img_align_celeba/
+data/img_align_celeba.zip
+data/list_attr_celeba.txt
+data/list_eval_partition.txt
+data/identity_CelebA.txt
+data/list_bbox_celeba.txt
+data/list_landmarks_align_celeba.txt
 
 ############################
-# Training artifacts (DO NOT COMMIT)
+# Results / checkpoints (DO NOT COMMIT)
 ############################
-checkpoints/
-weights/
-runs/
-outputs/*
-!outputs/.gitkeep
-results/
+results/checkpoints/
+results/logs/
+results/figures/
 
 *.pt
 *.pth
@@ -82,7 +76,7 @@ results/
 # TensorBoard
 events.out.tfevents.*
 
-# Weights & Biases
+# W&B
 wandb/
 
 ############################
