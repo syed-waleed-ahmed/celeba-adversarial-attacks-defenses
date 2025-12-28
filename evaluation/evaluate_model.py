@@ -7,7 +7,6 @@ from models.model_utils import get_device
 from models.resnet_classifier import ResNetAttributeClassifier
 from evaluation.metrics import accuracy_from_logits
 
-
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--ckpt", type=str, required=True)
@@ -16,7 +15,6 @@ def parse_args():
     p.add_argument("--num_workers", type=int, default=2)
     p.add_argument("--device", type=str, default=None)
     return p.parse_args()
-
 
 @torch.no_grad()
 def main():
@@ -44,7 +42,6 @@ def main():
 
     acc = sum(accs) / max(1, len(accs))
     print(f"Clean TEST accuracy ({attr}) = {acc:.4f}")
-
 
 if __name__ == "__main__":
     main()

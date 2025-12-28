@@ -7,6 +7,7 @@ Desktop.ini
 *.swp
 *.swo
 
+
 # Python
 __pycache__/
 *.py[cod]
@@ -38,9 +39,7 @@ htmlcov/
 logs/
 
 # Results / artifacts (DO NOT COMMIT)
-results/checkpoints/
-results/logs/
-results/figures/
+results/
 runs/
 outputs/
 checkpoints/
@@ -65,12 +64,13 @@ secrets/
 *.pem
 *.key
 
-# Ignore EVERYTHING inside data/celeba/ ...
-data/celeba/*
+# Data (DO NOT COMMIT DATASETS)
+# Ignore downloaded CelebA dataset files
+data/celeba/**
 
-# ... but KEEP the python helper scripts
-!data/celeba/data_loader.py
-!data/celeba/download_celeba.py
+# Keep helper scripts inside data/ tracked
+!data/__init__.py
+!data/*.py
 
-# Also keep the directory visible even if empty
-!data/celeba/
+# Keep directory structure visible
+!data/celeba/.gitkeep
