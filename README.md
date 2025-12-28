@@ -2,8 +2,8 @@
 
 ### Attribute Classification with Pretrained ResNet-18
 
-This project studies **adversarial robustness of deep neural networks** using the **CelebA (HOME)** dataset.
-We train an **ImageNet-pretrained ResNet-18** for **binary facial attribute classification** (e.g., *Smiling vs Not Smiling*), evaluate its vulnerability to **white-box adversarial attacks** (FGSM, optional PGD), and analyze defenses via **adversarial training**.
+This project studies **adversarial robustness of deep neural networks** using the **CelebA** dataset.
+We train an **ImageNet-pretrained ResNet-18** for **binary facial attribute classification** (e.g., *Smiling vs Not Smiling*), evaluate its vulnerability to **white-box adversarial attacks** (FGSM), and analyze defenses via **adversarial training**.
 
 The project is developed as part of the course **“Deep Learning: From Theory to Practice”**.
 
@@ -90,7 +90,7 @@ python -c "import torch; print('CUDA available:', torch.cuda.is_available()); pr
 
 Official dataset:
 
-* [https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html]
+* https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
 
 ---
 
