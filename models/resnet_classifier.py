@@ -1,30 +1,15 @@
+from __future__ import annotations
 import torch
 import torch.nn as nn
-from torchvision import models
+from torchvision.models import resnet18, ResNet18_Weights
 
-
-class ResNetAttributeClassifier(nn.Module):
-    """
-    ImageNet-pretrained ResNet (18/50) for binary attribute classification.
-    Output: single logit per image.
-    """
-
-    def __init__(self, backbone: str = "resnet18", pretrained: bool = True):
+class ResNet18Binary(nn.Module):
+    def __init__(self, pretrained: bool = True):
         super().__init__()
-        b = backbone.lower()
-
-        if b == "resnet18":
-            weights = models.ResNet18_Weights.DEFAULT if pretrained else None
-            net = models.resnet18(weights=weights)
-        elif b == "resnet50":
-            weights = models.ResNet50_Weights.DEFAULT if pretrained else None
-            net = models.resnet50(weights=weights)
-        else:
-            raise ValueError("backbone must be 'resnet18' or 'resnet50'")
-
-        in_features = net.fc.in_features
-        net.fc = nn.Linear(in_features, 1)  # binary logit
-        self.net = net
+        weights = ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
+        self.backbone = resnet18(weights=weights)
+        in_features = self.backbone.fc.in_features
+        self.backbone.fc = nn.Linear(in_features, 2)  # binary classification via logits for 2 classes
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)  # [B, 1]
+        return self.backbone(x)

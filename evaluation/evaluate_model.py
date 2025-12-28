@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
-
 import torch
-
 from data.data_loader import CelebAConfig, make_loaders
 from models.model_utils import get_device
 from models.resnet_classifier import ResNetAttributeClassifier

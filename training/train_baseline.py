@@ -1,75 +1,51 @@
 from __future__ import annotations
-
-import argparse
-from pathlib import Path
-
 import torch
+import torch.nn as nn
+from torch.cuda.amp import autocast, GradScaler
+from training.training_utils import TrainConfig, get_device, evaluate_accuracy, save_checkpoint
 
-from data.data_loader import CelebAConfig, make_loaders
-from models.model_utils import get_device, set_seed
-from models.resnet_classifier import ResNetAttributeClassifier
-from training.training_utils import get_loss, save_checkpoint, train_one_epoch, evaluate
+def train_baseline(model: torch.nn.Module,
+                   train_loader,
+                   val_loader,
+                   cfg: TrainConfig) -> str:
+    device = get_device()
+    model = model.to(device)
 
-
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument("--attr", type=str, default="Smiling")
-    p.add_argument("--epochs", type=int, default=3)
-    p.add_argument("--batch_size", type=int, default=128)
-    p.add_argument("--image_size", type=int, default=128)
-    p.add_argument("--num_workers", type=int, default=2)
-    p.add_argument("--backbone", type=str, default="resnet18")  # resnet18/resnet50
-    p.add_argument("--lr", type=float, default=1e-4)
-    p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--device", type=str, default=None)          # cpu/cuda
-    return p.parse_args()
-
-
-def main():
-    args = parse_args()
-    set_seed(args.seed)
-
-    device = get_device(args.device)
-    print(f"Device: {device}")
-
-    cfg = CelebAConfig(
-        attr=args.attr,
-        image_size=args.image_size,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-    )
-    train_loader, val_loader, _test_loader = make_loaders(cfg)
-
-    model = ResNetAttributeClassifier(backbone=args.backbone, pretrained=True).to(device)
-    criterion = get_loss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    scaler = GradScaler(enabled=(cfg.amp and device.type == "cuda"))
 
     best_val_acc = -1.0
-    ckpt_path = Path("results/checkpoints") / f"baseline_{args.attr.lower()}_{args.backbone}.pt"
+    best_path = f"{cfg.save_dir}/{cfg.run_name}_best.pt"
 
-    for epoch in range(1, args.epochs + 1):
-        tr = train_one_epoch(model, train_loader, criterion, optimizer, device)
-        va = evaluate(model, val_loader, criterion, device)
-        print(
-            f"Epoch {epoch}: "
-            f"train loss={tr['loss']:.4f} acc={tr['acc']:.4f} | "
-            f"val loss={va['loss']:.4f} acc={va['acc']:.4f}"
-        )
+    for epoch in range(1, cfg.epochs + 1):
+        model.train()
+        running_loss = 0.0
 
-        if va["acc"] > best_val_acc:
-            best_val_acc = va["acc"]
-            save_checkpoint(
-                ckpt_path,
-                {
-                    "attr": args.attr,
-                    "backbone": args.backbone,
-                    "model_state": model.state_dict(),
-                },
-            )
-            print(f"Saved best checkpoint -> {ckpt_path}")
+        for x, y in train_loader:
+            x = x.to(device, non_blocking=True)
+            y = y.to(device, non_blocking=True)
 
-    print(f"Done. Best val acc: {best_val_acc:.4f}")
+            optimizer.zero_grad(set_to_none=True)
 
+            with autocast(enabled=(cfg.amp and device.type == "cuda")):
+                logits = model(x)
+                loss = criterion(logits, y)
 
-if __name__ == "__main__":
-    main()
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+
+            running_loss += loss.item()
+
+        val_acc = evaluate_accuracy(model, val_loader, device)
+        avg_loss = running_loss / max(len(train_loader), 1)
+
+        print(f"Epoch {epoch}/{cfg.epochs} | loss={avg_loss:.4f} | val_acc={val_acc:.4f}")
+
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            save_checkpoint(best_path, model, optimizer, epoch, best_val_acc)
+
+    print(f"Best val acc: {best_val_acc:.4f}")
+    return best_path
