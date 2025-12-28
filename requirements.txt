@@ -1,34 +1,34 @@
-# Core DL
-torch
-torchvision
+# IMPORTANT (Windows + NVIDIA):
+# Install PyTorch separately for CUDA, e.g.:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# CelebA downloader dependency used by torchvision sometimes
-gdown
+# CelebA downloader dependency (torchvision may use it)
+gdown>=5.2.0
 
-# Data/metrics
-numpy
-pandas
-scikit-learn
+# Data / metrics
+numpy>=1.26.0
+pandas>=2.1.0
+scikit-learn>=1.3.0
 
 # Progress + console
-tqdm
-rich
+tqdm>=4.66.0
+rich>=13.7.0
 
 # Plotting
-matplotlib
+matplotlib>=3.8.0
 
 # Images
-Pillow
+Pillow>=10.0.0
 
 # Config
-pyyaml
+pyyaml>=6.0.1
 
-# Optional logging
-tensorboard
-wandb
+# Optional logging (comment out if not needed)
+tensorboard>=2.15.0
+wandb>=0.17.0
 
-# Dev tools (optional but useful)
-pytest
-black
-isort
-flake8
+# Dev tools (optional)
+pytest>=8.0.0
+black>=24.0.0
+isort>=5.13.0
+flake8>=7.0.0
