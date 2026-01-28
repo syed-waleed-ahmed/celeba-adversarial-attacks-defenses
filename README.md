@@ -1,35 +1,34 @@
-# Adversarial Attacks & Defenses on CelebA
+# Adversarial Attacks and Defenses on the CelebA Dataset
 
-### Attribute Classification with Pretrained ResNet-18
+This repository contains the code and experiments for the **Deep Learning final project** on adversarial attacks and defenses. We study the vulnerability of a convolutional neural network to adversarial examples and evaluate adversarial training as a defense strategy.
 
-This project studies **adversarial robustness of deep neural networks** using the **CelebA** dataset.
-We train an **ImageNet-pretrained ResNet-18** for **binary facial attribute classification** (e.g., *Smiling vs Not Smiling*), evaluate its vulnerability to **white-box adversarial attacks** (FGSM), and analyze defenses via **adversarial training**.
-
-The project is developed as part of the course **“Deep Learning: From Theory to Practice”**.
+The project focuses on **binary facial attribute classification (Smiling)** using the **CelebA dataset** and a **ResNet-18** model.
 
 ---
 
-## Project Scope
+## Project Overview
 
-* **Dataset**: CelebA (aligned & cropped images, official train/val/test split)
-* **Task**: Binary attribute classification (one attribute at a time)
-* **Model**: ImageNet-pretrained ResNet-18 (torchvision)
+* **Dataset**: CelebA (Smiling attribute)
+* **Model**: ResNet-18 pretrained on ImageNet
 * **Attacks**:
 
-  * FGSM
-  * PGD
-* **Defense**: Adversarial training
+  * Fast Gradient Sign Method (FGSM)
+  * Projected Gradient Descent (PGD)
+* **Defense**:
+
+  * Adversarial training (FGSM-based)
 * **Evaluation**:
 
-  * Clean accuracy
-  * Accuracy under attack vs ε
-  * Robustness vs clean-accuracy trade-off
+  * Accuracy under clean inputs
+  * Robustness under increasing perturbation strength (ε)
+  * Qualitative visualization of adversarial examples
 
 ---
 
 ## Repository Structure
 
 ```
+.
 ├── attacks/                 # FGSM and PGD implementations
 ├── defenses/                # Adversarial training
 ├── data/                    # CelebA dataset loader
@@ -39,7 +38,8 @@ The project is developed as part of the course **“Deep Learning: From Theory t
 ├── experiments/             # Entry-point scripts
 ├── results/
 │   ├── figures/             # Accuracy vs epsilon plots
-│   └── metrics/             # JSON metrics
+│   ├── metrics/             # JSON metrics
+│   └── adv_examples/        # Example adversarial images
 ├── config.py                # Experiment configuration
 ├── requirements.txt         # Python dependencies
 └── README.md
@@ -47,91 +47,148 @@ The project is developed as part of the course **“Deep Learning: From Theory t
 
 ---
 
-## Environment Setup (Windows + NVIDIA GPU)
+## Setup Instructions
 
-### 1) Create a virtual environment
+### 1. Create and activate a virtual environment
 
-```bash
+**Windows (PowerShell):**
+
+```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+.\.venv\Scripts\Activate.ps1
 ```
 
-### 2) Install PyTorch with CUDA (recommended)
-
-For NVIDIA GPUs:
+**macOS / Linux:**
 
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-### 3) Install remaining dependencies
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Dataset: CelebA
-
-* The CelebA dataset is **automatically downloaded** using `torchvision.datasets.CelebA`.
-* Dataset files are stored locally under:
-
-  ```
-  data/celeba/
-  ```
-* **Dataset files are NOT committed** to the repository (see `.gitignore`).
-
-Official dataset:
-
-* https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
-
 ---
 
-## Running the Baseline (Clean Training)
+## Running the Experiments
 
-This trains a **ResNet-18** classifier on a chosen attribute (default: *Smiling*) and evaluates clean accuracy.
+All commands should be run **from the project root directory**.
+
+### 1. Train the baseline model
 
 ```bash
 python -m experiments.run_baseline
 ```
 
-Expected output:
+This trains a ResNet-18 model on clean data and saves the best checkpoint to:
 
-* Training logs per epoch
-* Best validation accuracy
-* Clean test accuracy
-* Checkpoint saved to:
-
-  ```
-  results/checkpoints/resnet18_smiling_best.pt
-  ```
+```
+results/checkpoints/baseline_resnet18_smiling_best.pt
+```
 
 ---
 
-## Experiments Workflow
+### 2. Evaluate baseline robustness (FGSM & PGD)
 
-### Baseline
+```bash
+python -m experiments.run_attacks
+```
 
-* Train a clean model
-* Evaluate clean accuracy
+This generates:
 
-### Adversarial Attacks
+* Accuracy vs ε plots
+* Robustness metrics (JSON)
+* Example adversarial images
 
-* Generate adversarial examples (FGSM / PGD)
-* Evaluate accuracy vs ε
-* Save adversarial image samples and plots
+Outputs are saved in:
 
-### Defense
-
-* Train model with adversarial training
-* Compare clean vs attacked performance
-* Analyze robustness–accuracy trade-offs
+```
+results/figures/
+results/metrics/
+results/adv_examples/baseline/
+```
 
 ---
 
-## Notes & Best Practices
+### 3. Train defended model (adversarial training)
 
-* Images are resized to **128×128** for efficiency.
-* Epsilon (ε) values are defined in **pixel scale** (e.g., 8/255).
-* Official CelebA splits (train/val/test) are strictly respected.
-* All experiments are reproducible via scripts in `experiments/`.
+```bash
+python -m experiments.run_defense
+```
+
+By default, FGSM adversarial training is used.
+The defended model checkpoint is saved to:
+
+```
+results/checkpoints/defended_fgsm_resnet18_smiling_best.pt
+```
+
+The script also evaluates robustness under FGSM and PGD and saves comparison plots.
+
+---
+
+### 4. Compare baseline vs defense
+
+If included:
+
+```bash
+python -m experiments.compare_results
+```
+
+This generates a direct comparison plot between baseline and defended models.
+
+---
+
+## Results
+
+Key results are visualized as **accuracy vs epsilon** plots:
+
+* Baseline robustness
+* Defended model robustness
+* Baseline vs defense comparison
+
+Qualitative examples show that adversarial perturbations are visually imperceptible but highly effective.
+
+---
+
+## Notes on Implementation
+
+* Attacks are performed in **normalized input space**, with ε specified in **pixel space** and converted appropriately.
+* FGSM and PGD are implemented as **white-box attacks**.
+* Adversarial training mixes clean and adversarial samples during training.
+* Evaluation strictly uses the **test split** to avoid data leakage.
+
+---
+
+## Reproducibility
+
+All experiments are deterministic given a fixed random seed (defined in `config.py`).
+CelebA is downloaded automatically using `torchvision.datasets.CelebA`.
+
+---
+
+## AI Usage Statement
+
+AI-based tools were used to assist with structuring the report, improving clarity of writing, and checking consistency between implementation and methodology. All code implementation, experiments, result generation, and interpretation were performed and verified by the authors.
+
+---
+
+## References
+
+* Szegedy et al., *Intriguing Properties of Neural Networks*, ICLR 2014
+* Goodfellow et al., *Explaining and Harnessing Adversarial Examples*, ICLR 2015
+* Madry et al., *Towards Deep Learning Models Resistant to Adversarial Attacks*, ICLR 2018
+
+---
+
+## Authors
+
+Group 16
+
+* Rosen Stoev
+* Syed Waleed Ahmed
+* Alan Nessipbayev
+* Matthijs van der Bent
