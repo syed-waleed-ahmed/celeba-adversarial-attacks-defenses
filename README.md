@@ -170,12 +170,6 @@ CelebA is downloaded automatically using `torchvision.datasets.CelebA`.
 
 ---
 
-## AI Usage Statement
-
-AI-based tools were used to assist with structuring the report, improving clarity of writing, and checking consistency between implementation and methodology. All code implementation, experiments, result generation, and interpretation were performed and verified by the authors.
-
----
-
 ## References
 
 * Szegedy et al., *Intriguing Properties of Neural Networks*, ICLR 2014
