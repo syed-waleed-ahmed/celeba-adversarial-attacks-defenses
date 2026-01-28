@@ -30,17 +30,18 @@ The project is developed as part of the course **“Deep Learning: From Theory t
 ## Repository Structure
 
 ```
-.
-├── data/                 # Dataset loaders & helpers (CelebA not committed)
-├── models/               # Model definitions (ResNet-18 classifier)
-├── training/             # Baseline and defended training pipelines
-├── attacks/              # FGSM / PGD implementations
-├── defenses/             # Defense methods (adversarial training)
-├── evaluation/            # Metrics, evaluation scripts, visualizations
-├── experiments/           # Runnable scripts for experiments
-├── results/               # Checkpoints, logs, figures (ignored by git)
-├── report/                # Report files (LaTeX / figures)
-├── requirements.txt
+├── attacks/                 # FGSM and PGD implementations
+├── defenses/                # Adversarial training
+├── data/                    # CelebA dataset loader
+├── models/                  # ResNet classifier
+├── training/                # Training loops
+├── evaluation/              # Evaluation, plotting, visualization
+├── experiments/             # Entry-point scripts
+├── results/
+│   ├── figures/             # Accuracy vs epsilon plots
+│   └── metrics/             # JSON metrics
+├── config.py                # Experiment configuration
+├── requirements.txt         # Python dependencies
 └── README.md
 ```
 
@@ -48,7 +49,7 @@ The project is developed as part of the course **“Deep Learning: From Theory t
 
 ## Environment Setup (Windows + NVIDIA GPU)
 
-### 1) Create virtual environment
+### 1) Create a virtual environment
 
 ```bash
 python -m venv .venv
@@ -69,14 +70,6 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 ```bash
 pip install -r requirements.txt
 ```
-
-### 4) Verify CUDA is available
-
-```bash
-python -c "import torch; print('CUDA available:', torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
-```
-
----
 
 ## Dataset: CelebA
 
@@ -119,7 +112,7 @@ Expected output:
 
 ### Baseline
 
-* Train clean model
+* Train a clean model
 * Evaluate clean accuracy
 
 ### Adversarial Attacks
