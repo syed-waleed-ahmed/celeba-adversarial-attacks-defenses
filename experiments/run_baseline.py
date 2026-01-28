@@ -1,46 +1,49 @@
 from __future__ import annotations
-from data.celeba_dataset import CelebAConfig, get_celeba_dataloaders
-from models.resnet_classifier import ResNet18Binary
-from training.training_utils import TrainConfig, set_seed, get_device, evaluate_accuracy
-from training.train_baseline import train_baseline
-
-import torch
+import os
+from config import DataConfig, TrainConfig, Paths
+from data.data_loader import CelebAConfig, make_loaders
+from models.resnet_classifier import ResNetAttributeClassifier
+from models.model_utils import set_seed, get_device, ensure_dir, load_checkpoint
+from training.train_baseline import train_baseline, evaluate_accuracy
 
 def main():
-    set_seed(42)
+    paths = Paths()
+    ensure_dir(paths.checkpoints_dir)
 
-    data_cfg = CelebAConfig(
-        root="data/celeba",
-        attribute="Smiling",
-        image_size=128,
-        batch_size=64,
-        num_workers=4,
-        pin_memory=True,
+    data_cfg = DataConfig()
+    train_cfg = TrainConfig()
+    set_seed(train_cfg.seed)
+
+    loaders_cfg = CelebAConfig(
+        root=data_cfg.root,
+        attribute=data_cfg.attribute,
+        image_size=data_cfg.image_size,
+        batch_size=data_cfg.batch_size,
+        num_workers=data_cfg.num_workers,
     )
-    train_loader, val_loader, test_loader = get_celeba_dataloaders(data_cfg)
+    train_loader, val_loader, test_loader = make_loaders(loaders_cfg)
 
-    model = ResNet18Binary(pretrained=True)
+    model = ResNetAttributeClassifier(pretrained=True)
 
-    train_cfg = TrainConfig(
-        epochs=5,
-        lr=1e-4,
-        weight_decay=1e-4,
-        amp=True,
-        save_dir="results/checkpoints",
-        run_name="resnet18_smiling",
+    ckpt_path = os.path.join(paths.checkpoints_dir, f"baseline_resnet18_{data_cfg.attribute.lower()}_best.pt")
+    train_baseline(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        epochs=train_cfg.epochs,
+        lr=train_cfg.lr,
+        weight_decay=train_cfg.weight_decay,
+        amp=train_cfg.amp,
+        save_path=ckpt_path,
     )
 
-    best_path = train_baseline(model, train_loader, val_loader, train_cfg)
-
-    # Load best and evaluate test
+    # Evaluate clean test with best ckpt
     device = get_device()
-    ckpt = torch.load(best_path, map_location=device)
-    model.load_state_dict(ckpt["model_state"])
-    model = model.to(device)
-
+    load_checkpoint(ckpt_path, model, device)
+    model.to(device)
     test_acc = evaluate_accuracy(model, test_loader, device)
-    print(f"Clean test accuracy: {test_acc:.4f}")
-    print(f"Saved best checkpoint: {best_path}")
+    print(f"[Baseline] Clean test accuracy: {test_acc:.4f}")
+    print(f"[Baseline] Checkpoint: {ckpt_path}")
 
 if __name__ == "__main__":
     main()

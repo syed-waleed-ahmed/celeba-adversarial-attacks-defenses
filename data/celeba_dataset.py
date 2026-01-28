@@ -18,14 +18,12 @@ class CelebAConfig:
     num_workers: int = 4
     pin_memory: bool = True
 
-
 def _build_transforms(image_size: int) -> transforms.Compose:
     return transforms.Compose([
         transforms.Resize((image_size, image_size)),
         transforms.ToTensor(),
         transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
     ])
-
 
 class CelebAAttributeDataset(torch.utils.data.Dataset):
     """
@@ -40,11 +38,10 @@ class CelebAAttributeDataset(torch.utils.data.Dataset):
         return len(self.base)
 
     def __getitem__(self, idx: int):
-        x, attrs = self.base[idx]  # x: PIL->tensor (via transform), attrs: tensor of shape [40]
+        x, attrs = self.base[idx]  # attrs shape [40]
         y = attrs[self.attr_index].item()
         y = 1 if y == 1 else 0
         return x, torch.tensor(y, dtype=torch.long)
-
 
 def get_celeba_dataloaders(cfg: CelebAConfig) -> Tuple[DataLoader, DataLoader, DataLoader]:
     tfm = _build_transforms(cfg.image_size)

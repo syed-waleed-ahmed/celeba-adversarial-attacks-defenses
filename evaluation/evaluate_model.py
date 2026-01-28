@@ -1,47 +1,78 @@
 from __future__ import annotations
-import argparse
-from pathlib import Path
+import json
+from typing import Dict, List, Literal
 import torch
-from data.data_loader import CelebAConfig, make_loaders
-from models.model_utils import get_device
-from models.resnet_classifier import ResNetAttributeClassifier
-from evaluation.metrics import accuracy_from_logits
+from models.model_utils import get_device, ensure_dir
+from attacks.fgsm import fgsm_attack
+from attacks.pgd import pgd_attack
 
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument("--ckpt", type=str, required=True)
-    p.add_argument("--batch_size", type=int, default=128)
-    p.add_argument("--image_size", type=int, default=128)
-    p.add_argument("--num_workers", type=int, default=2)
-    p.add_argument("--device", type=str, default=None)
-    return p.parse_args()
+AttackType = Literal["clean", "fgsm", "pgd"]
 
 @torch.no_grad()
-def main():
-    args = parse_args()
-    device = get_device(args.device)
-    print(f"Device: {device}")
-
-    ckpt = torch.load(Path(args.ckpt), map_location="cpu")
-    attr = ckpt["attr"]
-    backbone = ckpt.get("backbone", "resnet18")
-
-    cfg = CelebAConfig(attr=attr, image_size=args.image_size, batch_size=args.batch_size, num_workers=args.num_workers)
-    _train, _val, test_loader = make_loaders(cfg)
-
-    model = ResNetAttributeClassifier(backbone=backbone, pretrained=False).to(device)
-    model.load_state_dict(ckpt["model_state"])
+def eval_clean(model: torch.nn.Module, loader) -> float:
+    device = get_device()
     model.eval()
+    correct, total = 0, 0
+    for x, y in loader:
+        x = x.to(device, non_blocking=True)
+        y = y.to(device, non_blocking=True)
+        logits = model(x)
+        pred = logits.argmax(dim=1)
+        correct += (pred == y).sum().item()
+        total += y.numel()
+    return correct / max(total, 1)
 
-    accs = []
-    for x, y in test_loader:
-        x = x.to(device)
-        y = y.to(device)
-        logits = model(x).squeeze(1)
-        accs.append(accuracy_from_logits(logits, y))
+def eval_under_attack(
+    model: torch.nn.Module,
+    loader,
+    eps_list: List[float],
+    attack: AttackType,
+    pgd_steps: int = 10,
+    pgd_alpha: float = 2/255
+) -> Dict[float, float]:
+    device = get_device()
+    model.eval()
+    results: Dict[float, float] = {}
 
-    acc = sum(accs) / max(1, len(accs))
-    print(f"Clean TEST accuracy ({attr}) = {acc:.4f}")
+    for eps in eps_list:
+        correct, total = 0, 0
 
-if __name__ == "__main__":
-    main()
+        for x, y in loader:
+            x = x.to(device, non_blocking=True)
+            y = y.to(device, non_blocking=True)
+
+            if attack == "clean":
+                x_adv = x
+            elif attack == "fgsm":
+                # fgsm_attack already enables grads internally
+                x_adv = fgsm_attack(model, x, y, eps_pixel=eps)
+            elif attack == "pgd":
+                # pgd_attack is now bulletproof too, but keeping explicit grad is fine
+                with torch.enable_grad():
+                    x_adv = pgd_attack(
+                        model, x, y,
+                        eps_pixel=eps,
+                        alpha_pixel=pgd_alpha,
+                        steps=pgd_steps,
+                        random_start=True
+                    )
+            else:
+                raise ValueError("attack must be clean/fgsm/pgd")
+
+            # Inference under no_grad
+            with torch.no_grad():
+                logits = model(x_adv)
+                pred = logits.argmax(dim=1)
+                correct += (pred == y).sum().item()
+                total += y.numel()
+
+        results[float(eps)] = correct / max(total, 1)
+        print(f"[Eval {attack}] eps={eps:.6f} acc={results[float(eps)]:.4f}")
+
+    return results
+
+def save_metrics_json(path: str, payload: dict) -> None:
+    out_dir = path.rsplit("/", 1)[0] if "/" in path else "."
+    ensure_dir(out_dir)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
