@@ -1,6 +1,5 @@
 from __future__ import annotations
 import os
-
 from config import DataConfig, AttackConfig, Paths
 from data.data_loader import CelebAConfig, make_loaders
 from models.resnet_classifier import ResNetAttributeClassifier

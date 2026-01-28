@@ -2,12 +2,10 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 from torch.amp import autocast, GradScaler
-
 from models.model_utils import get_device, save_checkpoint
 from training.train_baseline import evaluate_accuracy
 from attacks.fgsm import fgsm_attack
 from attacks.pgd import pgd_attack
-
 
 def train_adversarial(
     model: torch.nn.Module,
@@ -26,7 +24,7 @@ def train_adversarial(
 ) -> None:
     """
     Adversarial training: generate adversarial examples on-the-fly and train on a mix.
-    mix_clean=0.5 means 50% clean + 50% adversarial in each batch.
+    mix_clean=0.5 means ~50% clean + ~50% adversarial (randomized selection each batch).
     """
     device = get_device()
     model.to(device)
@@ -36,6 +34,7 @@ def train_adversarial(
     scaler = GradScaler("cuda", enabled=(amp and device.type == "cuda"))
 
     best_val_acc = -1.0
+    method_l = method.lower()
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -47,28 +46,34 @@ def train_adversarial(
 
             # Generate adversarial examples in eval mode (standard practice)
             model.eval()
-            if method.lower() == "fgsm":
+            if method_l == "fgsm":
                 x_adv = fgsm_attack(model, x, y, eps_pixel=eps_pixel)
-            elif method.lower() == "pgd":
-                x_adv = pgd_attack(
-                    model, x, y,
-                    eps_pixel=eps_pixel,
-                    alpha_pixel=pgd_alpha_pixel,
-                    steps=pgd_steps,
-                    random_start=True
-                )
+            elif method_l == "pgd":
+                with torch.enable_grad():
+                    x_adv = pgd_attack(
+                        model, x, y,
+                        eps_pixel=eps_pixel,
+                        alpha_pixel=pgd_alpha_pixel,
+                        steps=pgd_steps,
+                        random_start=True
+                    )
             else:
                 raise ValueError("method must be 'fgsm' or 'pgd'")
 
             # Back to train mode for optimization
             model.train()
 
-            # Mix clean & adv
+            # Random mix clean & adv
             if 0.0 < mix_clean < 1.0:
                 n = x.size(0)
-                k = int(n * mix_clean)
-                x_mix = torch.cat([x[:k], x_adv[k:]], dim=0)
-                y_mix = torch.cat([y[:k], y[k:]], dim=0)
+                k = int(round(n * mix_clean))
+                perm = torch.randperm(n, device=device)
+                clean_idx = perm[:k]
+                adv_idx = perm[k:]
+
+                x_mix = x.clone()
+                x_mix[adv_idx] = x_adv[adv_idx]
+                y_mix = y
             elif mix_clean <= 0.0:
                 x_mix, y_mix = x_adv, y
             else:

@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Tuple
-
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms

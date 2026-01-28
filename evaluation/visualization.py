@@ -1,9 +1,7 @@
 from __future__ import annotations
 import os
 from typing import Dict
-
 import matplotlib.pyplot as plt
-
 from models.model_utils import ensure_dir
 
 def plot_acc_vs_eps(curves: Dict[str, Dict[float, float]], title: str, save_path: str) -> None:
