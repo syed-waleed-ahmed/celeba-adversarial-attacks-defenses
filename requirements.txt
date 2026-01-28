@@ -1,8 +1,4 @@
-# IMPORTANT (Windows + NVIDIA):
-# Install PyTorch separately for CUDA, e.g.:
-# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
-# CelebA downloader dependency (torchvision may use it)
+# CelebA downloader dependency
 gdown>=5.2.0
 
 # Data / metrics

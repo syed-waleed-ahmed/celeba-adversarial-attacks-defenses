@@ -16,8 +16,8 @@ The project is developed as part of the course **“Deep Learning: From Theory t
 * **Model**: ImageNet-pretrained ResNet-18 (torchvision)
 * **Attacks**:
 
-  * FGSM (baseline, required)
-  * PGD (optional extension)
+  * FGSM
+  * PGD
 * **Defense**: Adversarial training
 * **Evaluation**:
 

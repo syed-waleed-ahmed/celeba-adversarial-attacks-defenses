@@ -3,7 +3,6 @@ import torch
 import torch.nn.functional as F
 from attacks.attack_utils import clamp_normalized, eps_pixel_to_norm
 
-
 def fgsm_attack(
     model: torch.nn.Module,
     x_norm: torch.Tensor,

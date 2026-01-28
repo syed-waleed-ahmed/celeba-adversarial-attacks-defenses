@@ -7,7 +7,6 @@ from attacks.fgsm import fgsm_attack
 from attacks.pgd import pgd_attack
 from attacks.attack_utils import to_device_stats
 
-
 def denormalize(x_norm: torch.Tensor) -> torch.Tensor:
     """
     Invert ImageNet normalization:
@@ -20,7 +19,6 @@ def denormalize(x_norm: torch.Tensor) -> torch.Tensor:
     x = x_norm * std + mean
     return torch.clamp(x, 0.0, 1.0)
 
-
 def _scale_for_visibility(delta: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     """
     Scale a delta image to [0,1] for visualization.
@@ -29,7 +27,6 @@ def _scale_for_visibility(delta: torch.Tensor, eps: float = 1e-8) -> torch.Tenso
     # Normalize per-batch (global max) to preserve relative patterns
     m = delta.max().clamp(min=eps)
     return torch.clamp(delta / m, 0.0, 1.0)
-
 
 def save_adversarial_examples(
     model: torch.nn.Module,
@@ -83,7 +80,7 @@ def save_adversarial_examples(
         x_vis = denormalize(x)
         adv_vis = denormalize(x_adv)
 
-        # Compute delta in pixel space (true magnitude in [0,1])
+        # Compute delta in pixel space
         delta_raw = torch.abs(adv_vis - x_vis)
         delta_scaled = _scale_for_visibility(delta_raw)
 
@@ -98,13 +95,13 @@ def save_adversarial_examples(
             os.path.join(out_dir, f"{method_l}_eps{eps_pixel:.6f}.png"),
             nrow=nrow
         )
-        # Raw delta (truthful magnitude, often dark)
+        # Raw delta
         save_image(
             delta_raw[:n_save],
             os.path.join(out_dir, f"delta_{method_l}_raw_eps{eps_pixel:.6f}.png"),
             nrow=nrow
         )
-        # Scaled delta (for visibility in report)
+        # Scaled delta
         save_image(
             delta_scaled[:n_save],
             os.path.join(out_dir, f"delta_{method_l}_scaled_eps{eps_pixel:.6f}.png"),
