@@ -32,7 +32,6 @@ def pgd_attack(
     else:
         x_adv = x0.clone()
 
-    # Bulletproof: works even if caller is under no_grad()
     with torch.enable_grad():
         for _ in range(steps):
             x_adv = x_adv.detach().requires_grad_(True)

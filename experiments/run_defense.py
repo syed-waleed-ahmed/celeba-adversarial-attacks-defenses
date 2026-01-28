@@ -33,7 +33,7 @@ def main():
 
     # Defense training config
     eps_train = 8/255
-    defense_method = "fgsm"  # change to "pgd" for stronger defense (slower)
+    defense_method = "fgsm"
 
     defended_ckpt = os.path.join(paths.checkpoints_dir, f"defended_{defense_method}_resnet18_{data_cfg.attribute.lower()}_best.pt")
     train_adversarial(

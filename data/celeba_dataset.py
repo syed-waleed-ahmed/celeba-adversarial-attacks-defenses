@@ -26,7 +26,6 @@ def _build_transforms(image_size: int) -> transforms.Compose:
         transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
     ])
 
-
 class CelebAAttributeDataset(torch.utils.data.Dataset):
     """
     Wraps torchvision CelebA so labels are 0/1 for a single chosen attribute.
@@ -40,7 +39,7 @@ class CelebAAttributeDataset(torch.utils.data.Dataset):
         return len(self.base)
 
     def __getitem__(self, idx: int):
-        x, attrs = self.base[idx]  # x: PIL->tensor (via transform), attrs: tensor of shape [40]
+        x, attrs = self.base[idx]  # attrs shape [40]
         y = attrs[self.attr_index].item()
         y = 1 if y == 1 else 0
         return x, torch.tensor(y, dtype=torch.long)

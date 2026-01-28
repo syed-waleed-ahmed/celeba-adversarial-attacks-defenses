@@ -22,8 +22,7 @@ def fgsm_attack(
     eps_norm = eps_pixel_to_norm(eps_pixel, device)
 
     model.eval()
-
-    # Bulletproof: ensures grads work even if caller accidentally uses no_grad()
+    
     with torch.enable_grad():
         x_adv = x_norm.detach().clone().requires_grad_(True)
         logits = model(x_adv)

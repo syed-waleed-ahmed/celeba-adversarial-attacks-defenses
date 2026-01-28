@@ -44,7 +44,7 @@ def train_adversarial(
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
 
-            # Generate adversarial examples in eval mode (standard practice)
+            # Generate adversarial examples in eval mode
             model.eval()
             if method_l == "fgsm":
                 x_adv = fgsm_attack(model, x, y, eps_pixel=eps_pixel)
