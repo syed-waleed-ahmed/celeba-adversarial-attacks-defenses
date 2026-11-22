@@ -37,8 +37,10 @@ htmlcov/
 *.log
 logs/
 
-# Results / artifacts (DO NOT COMMIT)
-results/
+# Results / artifacts (DO NOT COMMIT), except the small metrics JSON
+# files that the README's numbers come from
+results/*
+!results/metrics/
 runs/
 outputs/
 checkpoints/

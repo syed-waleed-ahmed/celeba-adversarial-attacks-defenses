@@ -150,6 +150,8 @@ Key results are visualized as **accuracy vs epsilon** plots:
 * Defended model robustness
 * Baseline vs defense comparison
 
+The numbers behind the plots are committed in `results/metrics/`: test accuracy at each epsilon (0, then 1/255 to 16/255 in pixel scale) under FGSM and PGD, for the baseline (`baseline_attack_smiling.json`) and the FGSM-trained model (`defended_fgsm_smiling.json`). The baseline reaches 93.0% clean test accuracy; PGD at ε = 4/255 brings it down to 0.05%, and to 0.77% for the FGSM-trained model.
+
 Qualitative examples show that adversarial perturbations are visually imperceptible but highly effective.
 
 ---
